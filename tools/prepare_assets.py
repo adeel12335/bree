@@ -76,6 +76,13 @@ for f in (MEDIA / 'blog').glob('*'):
     size, nbytes = save(f, 'blog-' + f.stem, 1200, 80)
     print(f'blog-{f.stem:27} {size} {nbytes // 1024} KB')
 
+# Client-supplied photo (IIBA award for Deadly Vows): trim the screenshot bars, then a
+# full version for the gallery and an arch-shaped crop (both people) for the home hero.
+award = Image.open(MEDIA / 'img' / 'iiba-deadly-vows-award.png').convert('RGB').crop((0, 30, 1080, 744))
+award.save(OUT / 'iiba-deadly-vows-award.webp', 'WEBP', quality=86, method=6)
+award.crop((205, 0, 715, 714)).save(OUT / 'bree-iiba-deadly-vows-hero.webp', 'WEBP', quality=88, method=6)
+award.crop((205, 0, 715, 714)).save(MEDIA / 'img' / 'bree-hero-crop.png')
+
 # Bree's handwritten signature (from the site's share image) -> gold on transparent
 sig = Image.open(MEDIA / 'img' / 'Home-Bree-T-Wilson.png').convert('L')
 sig = sig.crop(sig.point(lambda v: 255 if v < 140 else 0).getbbox())
@@ -110,7 +117,7 @@ def share_card(cover, title, line2, out):
     bg.convert('RGB').save(OUT / out, quality=84)
 
 
-share_card(MEDIA / 'img' / '1000014852.jpg', ['Murder Mystery', 'Author'], '4-time International Impact Book Award winner', 'og.jpg')
+share_card(MEDIA / 'img' / 'bree-hero-crop.png', ['Murder Mystery', 'Author'], '4-time International Impact Book Award winner', 'og.jpg')
 share_card(MEDIA / 'img' / 'Deadly-College-Murders-3d-Book-Cover.png', ['Deadly College', 'Murders'], 'Book 1 · The Hannah Walker Mystery Series', 'og-deadly-college-murders.jpg')
 share_card(MEDIA / 'img' / 'Deadly-Vows-3d-Cover.png', ['Deadly Vows'], 'Echoes of College Crimes · Hannah Walker Book 2', 'og-deadly-vows.jpg')
 share_card(MEDIA / 'img' / 'Paris-Noir-3d-cover.png', ['Paris Noir'], 'Deadly Obsession · Hannah Walker Book 3', 'og-paris-noir.jpg')

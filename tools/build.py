@@ -269,7 +269,7 @@ def meta_desc(text, limit=158):
 
 
 PERSON = {'@type': 'Person', '@id': SITE_URL + '/#author', 'name': 'Bree T. Wilson', 'url': SITE_URL + '/',
-          'image': SITE_URL + '/assets/img/bree-gala-portrait.webp', 'jobTitle': 'Murder Mystery Author',
+          'image': SITE_URL + '/assets/img/iiba-deadly-vows-award.webp', 'jobTitle': 'Murder Mystery Author',
           'email': 'mailto:' + EMAIL, 'sameAs': [INSTAGRAM, TIKTOK, PRESS_RELEASE],
           'award': ['International Impact Book Awards — Paris Noir: Deadly Obsession (2025)',
                     'International Impact Book Awards — Deadly Vows: Echoes of College Crimes (2026)',
@@ -389,7 +389,7 @@ def home():
       <div class="hero__actions reveal" style="--d:240ms">{btn('Explore the Books', '/books/')}{btn('About Bree', '/about/', 'ghost', arrow=False)}</div>
     </div>
     <div class="hero__portrait reveal" style="--d:200ms">
-      <div class="arch">{img('bree-gala-portrait', 'Bree T. Wilson at the International Impact Book Awards gala holding her novel', eager=True, w=1024, h=1536)}</div>
+      <div class="arch">{img('bree-iiba-deadly-vows-hero', 'Bree T. Wilson receiving her International Impact Book Award for Deadly Vows: Echoes of College Crimes', eager=True)}</div>
       {img('distinguished-author-seal', 'International Impact Book Awards — Distinguished Author seal', 'hero__seal', w=600, h=600)}
     </div>
   </div>
@@ -458,7 +458,7 @@ def home():
                'description': 'Official website of murder mystery author Bree T. Wilson', 'publisher': {'@id': SITE_URL + '/#author'}},
               PERSON, series_schema()]
     return layout('/', SITE_NAME, 'Official site of Bree T. Wilson, four-time International Impact Book Awards winner and author of the Hannah Walker Mystery Series, from Deadly College Murders to Paris Noir.', body, '/', schema=schema, body_cls='is-home',
-                  preload=['bree-gala-portrait', 'bg-library'])
+                  preload=['bree-iiba-deadly-vows-hero', 'bg-library'])
 
 
 def about():
