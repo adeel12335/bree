@@ -38,8 +38,13 @@ for f in sorted(PUB.rglob('*.html')):
     for u in re.findall(r'(?:href|src|poster|data-zoom)="([^"#:?]+)', s) + re.findall(r"url\('([^']+)'\)", s):
         if u.startswith(('http', 'mailto', '//')) or not u:
             continue
-        target = (f.parent / unquote(u)).resolve()
-        if not target.exists():
+        u = unquote(u)
+        if u.startswith('/'):  # --deploy build: clean root URLs served as /page -> page.html
+            base = PUB / u.strip('/')
+            ok = u == '/' or base.is_file() or base.with_name(base.name + '.html').is_file()
+        else:
+            ok = (f.parent / u).resolve().exists()
+        if not ok:
             issues.append((rel, 'broken link ' + u))
 for t, fs in titles.items():
     if len(fs) > 1:
