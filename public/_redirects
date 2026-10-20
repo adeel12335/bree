@@ -1,0 +1,7 @@
+/home            /                301
+/index           /                301
+/cart            /books           301
+/books/*         /books           301
+/blog/:slug/     /blog/:slug      301
+/:page/          /:page           301
+/*               /404.html        404

@@ -1,0 +1,9 @@
+# raw scrape of the old site and one-off exports (large, regenerable)
+source/
+figma-export/
+*.zip
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+text/
