@@ -101,6 +101,44 @@ def full_title(b):
     return b['title'] + (f': {b["subtitle"]}' if b['subtitle'] else '')
 
 
+def series_ids():
+    ids = []
+    for b in BOOKS:
+        if b['series'] not in ids:
+            ids.append(b['series'])
+    return ids
+
+
+def books_in(series):
+    return [b for b in BOOKS if b['series'] == series]
+
+
+def series_short(series):
+    return books_in(series)[0]['series_name'].replace(' Mystery Series', '')
+
+
+def series_kicker(b):
+    return f'{b["series_name"].removesuffix(" Series")} · Book {b["series_no"]}'
+
+
+def status_label(b):
+    return b.get('status_label') or 'Coming Soon'
+
+
+def cover_class(b, base):
+    if b.get('cover_fit') == 'contain':
+        return base + ' is-poster'
+    if b['status'] == 'coming-soon':
+        return base + ' is-flat'
+    return base
+
+
+def award_html(b):
+    if not b.get('award'):
+        return ''
+    return f'<p class="award-line">{ICONS["star"]} {esc(b["award"])}</p>'
+
+
 def fmt_date(d):
     if not d:
         return ''
@@ -168,9 +206,9 @@ def contact_strip():
 
 def book_card(b, i=0):
     soon = b['status'] == 'coming-soon'
-    flag = '<span class="book-card__flag">Coming Soon</span>' if soon else ''
-    cover_cls = 'book-card__cover' + (' is-flat' if soon else '')
-    label = 'Coming Soon' if soon else 'Learn More'
+    flag = f'<span class="book-card__flag">{esc(status_label(b))}</span>' if soon else ''
+    cover_cls = cover_class(b, 'book-card__cover')
+    label = status_label(b) if soon else 'Learn More'
     sub = f'<span>{esc(b["subtitle"])}</span>' if b['subtitle'] else ''
     return f'''<article class="book-card reveal" style="--d:{i * 90}ms">
   <a class="book-card__link" href="{book_url(b)}" aria-label="{esc(full_title(b))}">
@@ -209,10 +247,13 @@ def header(active):
     for label, href in NAV:
         cur = ' aria-current="page"' if active == href else ''
         if label == 'Books':
-            sub = ''.join(f'<li><a href="{book_url(b)}">{esc(full_title(b))}</a></li>' for b in BOOKS)
+            sub = ['<li><a href="/books/">All Books</a></li>']
+            for series in series_ids():
+                sub.append(f'<li class="sub__label">{esc(series_short(series))}</li>')
+                sub.extend(f'<li><a href="{book_url(b)}">{esc(full_title(b))}</a></li>' for b in books_in(series))
             items.append(f'''<li class="has-sub"><a href="{href}"{cur}>{label}</a>
           <button class="sub-toggle" aria-label="Show books" aria-expanded="false"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></button>
-          <ul class="sub"><li><a href="/books/">All Books</a></li>{sub}</ul></li>''')
+          <ul class="sub">{''.join(sub)}</ul></li>''')
         else:
             items.append(f'<li><a href="{href}"{cur}>{label}</a></li>')
     return f'''<header class="site-header" data-header>
@@ -229,7 +270,13 @@ def header(active):
 
 
 def footer():
-    books = ''.join(f'<li><a href="{book_url(b)}">{"<em>Coming Soon:</em> " if b["status"] == "coming-soon" else ""}{esc(full_title(b))}</a></li>' for b in BOOKS)
+    books = []
+    for series in series_ids():
+        items = ''.join(
+            f'<li><a href="{book_url(b)}">{f"<em>{esc(status_label(b))}:</em> " if b["status"] == "coming-soon" else ""}{esc(full_title(b))}</a></li>'
+            for b in books_in(series))
+        books.append(f'<p class="footer-series">{esc(series_short(series))}</p><ul>{items}</ul>')
+    books = ''.join(books)
     return f'''<footer class="site-footer">
   <div class="container site-footer__grid">
     <div class="site-footer__brand">
@@ -237,7 +284,7 @@ def footer():
       <p>4-time International Impact Book Award Distinguished Author Winner.</p>
       {social_links()}
     </div>
-    <div><h2 class="mini-h">Books</h2><ul>{books}</ul></div>
+    <div><h2 class="mini-h">Books</h2>{books}</div>
     <div><h2 class="mini-h">Explore</h2><ul>
       <li><a href="/about/">About</a></li><li><a href="/awards/">Awards</a></li><li><a href="/blog/">Blog</a></li>
       <li><a href="/welcome/">Welcome!</a></li><li><a href="{PRESS_RELEASE}" target="_blank" rel="noopener">Author Press Release</a></li>
@@ -352,7 +399,7 @@ def book_schema(b, full=False):
     d = {'@type': 'Book', '@id': clean_url(book_url(b)) + '#book', 'name': full_title(b), 'url': clean_url(book_url(b)),
          'author': {'@id': SITE_URL + '/#author'}, 'image': f'{SITE_URL}/assets/img/{b["flat"]}.webp',
          'bookFormat': 'https://schema.org/EBook', 'inLanguage': 'en', 'genre': ['Mystery', 'Thriller', 'Crime Fiction'],
-         'position': b['series_no'], 'isPartOf': {'@id': SITE_URL + '/books#series'}}
+         'position': b['series_no'], 'isPartOf': {'@id': SITE_URL + '/books#' + b['series']}}
     if b.get('isbn'):
         d['isbn'] = b['isbn']
     if b.get('published'):
@@ -361,22 +408,27 @@ def book_schema(b, full=False):
         d['sameAs'] = [u for _, u in b['shop']]
     if full:
         d['description'] = re.sub(r'<[^>]+>', '', ' '.join(b['blurb'][:3]))
-        d['award'] = b['award']
+        if b.get('award'):
+            d['award'] = b['award']
         d['author'] = PERSON
-        d['isPartOf'] = {'@type': 'BookSeries', 'name': 'The Hannah Walker Mystery Series', 'url': clean_url('/books/')}
+        d['isPartOf'] = {'@type': 'BookSeries', 'name': b['series_name'], 'url': clean_url('/books/')}
     return d
 
 
-def series_schema():
-    return {'@type': 'BookSeries', '@id': SITE_URL + '/books#series', 'name': 'The Hannah Walker Mystery Series',
-            'url': clean_url('/books/'), 'author': {'@id': SITE_URL + '/#author'},
-            'hasPart': [book_schema(b) for b in BOOKS]}
+def series_schemas():
+    schemas = []
+    for series in series_ids():
+        schemas.append({'@type': 'BookSeries', '@id': SITE_URL + '/books#' + series, 'name': books_in(series)[0]['series_name'],
+                        'url': clean_url('/books/'), 'author': {'@id': SITE_URL + '/#author'},
+                        'hasPart': [book_schema(b) for b in books_in(series)]})
+    return schemas
 
 
 # ---------------------------------------------------------------- pages
 
 def home():
-    books = ''.join(book_card(b, i) for i, b in enumerate(BOOKS))
+    hannah = ''.join(book_card(b, i) for i, b in enumerate(books_in('hannah-walker')))
+    astrid = ''.join(book_card(b, i) for i, b in enumerate(books_in('astrid-fitzgerald')))
     latest = ''.join(post_card(p) for p in POSTS[:3])
     body = f'''
 <section class="hero">
@@ -386,14 +438,27 @@ def home():
       {eyebrow('4-Time Award-Winning Author', 'reveal')}
       <h1 class="display hero__title reveal" style="--d:80ms"><span class="hero__name">Bree T. Wilson</span>Renowned Murder<br>Mystery Author</h1>
       <p class="hero__lead reveal" style="--d:160ms">Bree’s storytelling blends the cerebral thrill of riddles with the raw humanity of resilience, memory, and emotional depth.</p>
-      <div class="hero__actions reveal" style="--d:240ms">{btn('Explore the Books', '/books/')}{btn('About Bree', '/about/', 'ghost', arrow=False)}</div>
+      <div class="hero__actions reveal" style="--d:240ms">{btn('Explore the Books', '/books/')}{btn('Watch the Intro', '#intro', 'ghost', arrow=False)}</div>
     </div>
     <div class="hero__portrait reveal" style="--d:200ms">
       <div class="arch">{img('bree-iiba-deadly-vows-hero', 'Bree T. Wilson receiving her International Impact Book Award for Deadly Vows: Echoes of College Crimes', eager=True)}</div>
       {img('distinguished-author-seal', 'International Impact Book Awards — Distinguished Author seal', 'hero__seal', w=600, h=600)}
     </div>
   </div>
-  <a class="scroll-cue" href="#books" aria-label="Scroll to the books"><span></span></a>
+  <a class="scroll-cue" href="#intro" aria-label="Scroll to the introduction"><span></span></a>
+</section>
+
+<section class="intro-film" id="intro">
+  <div class="container">
+    <div class="section-head reveal">
+      <div>{eyebrow('Introduction')}<h2 class="display h2">A Short Film</h2></div>
+    </div>
+    <div class="intro-film__frame reveal" style="--d:80ms">
+      <video controls playsinline preload="metadata" poster="/assets/img/site-intro-poster.jpg">
+        <source src="/assets/video/site-intro.mp4" type="video/mp4">
+      </video>
+    </div>
+  </div>
 </section>
 
 <section class="books-shelf" id="books">
@@ -403,7 +468,12 @@ def home():
       <div>{eyebrow('The Books')}<h2 class="display h2">The Hannah Walker<br>Mystery Series</h2></div>
       <a class="link-arrow" href="/books/">View All Books {ICONS['arrow']}</a>
     </div>
-    <div class="book-grid">{books}</div>
+    <div class="book-grid">{hannah}</div>
+    <div class="section-head series-follow reveal">
+      <div>{eyebrow('In Development')}<h2 class="display h2">The Astrid Fitzgerald<br>Mystery Series</h2></div>
+      <a class="link-arrow" href="/books/#astrid-fitzgerald">View the Series {ICONS['arrow']}</a>
+    </div>
+    <div class="book-grid book-grid--3">{astrid}</div>
   </div>
 </section>
 
@@ -456,8 +526,8 @@ def home():
 {contact_strip()}'''
     schema = [{'@type': 'WebSite', '@id': SITE_URL + '/#website', 'url': SITE_URL + '/', 'name': SITE_NAME,
                'description': 'Official website of murder mystery author Bree T. Wilson', 'publisher': {'@id': SITE_URL + '/#author'}},
-              PERSON, series_schema()]
-    return layout('/', SITE_NAME, 'Official site of Bree T. Wilson, four-time International Impact Book Awards winner and author of the Hannah Walker Mystery Series, from Deadly College Murders to Paris Noir.', body, '/', schema=schema, body_cls='is-home',
+              PERSON, *series_schemas()]
+    return layout('/', SITE_NAME, 'Official site of Bree T. Wilson, four-time International Impact Book Awards winner and author of the Hannah Walker and Astrid Fitzgerald mystery series.', body, '/', schema=schema, body_cls='is-home',
                   preload=['bree-iiba-deadly-vows-hero', 'bg-library'])
 
 
@@ -499,36 +569,47 @@ def about():
 
 
 def books_index():
-    rows = []
-    for i, b in enumerate(BOOKS):
-        soon = b['status'] == 'coming-soon'
-        actions = btn('Learn More', book_url(b))
-        if b['shop']:
-            actions += btn(f'Buy on {b["shop"][0][0]}', b['shop'][0][1], 'ghost', ext=True)
-        rows.append(f'''<article class="book-row{' book-row--rev' if i % 2 else ''}">
-  <a class="book-row__cover reveal{' is-flat' if soon else ''}" href="{book_url(b)}">{'<span class="book-card__flag">Coming Soon</span>' if soon else ''}{img(b['cover'], full_title(b) + ' book cover')}</a>
+    sections = []
+    for series in series_ids():
+        rows = []
+        for i, b in enumerate(books_in(series)):
+            soon = b['status'] == 'coming-soon'
+            actions = btn('Learn More', book_url(b))
+            if b['shop']:
+                actions += btn(f'Buy on {b["shop"][0][0]}', b['shop'][0][1], 'ghost', ext=True)
+            flag = f'<span class="book-card__flag">{esc(status_label(b))}</span>' if soon else ''
+            rows.append(f'''<article class="book-row{' book-row--rev' if i % 2 else ''}">
+  <a class="{cover_class(b, 'book-row__cover')} reveal" href="{book_url(b)}">{flag}{img(b['cover'], full_title(b) + ' book cover')}</a>
   <div class="book-row__copy reveal" style="--d:120ms">
-    {eyebrow(f'Hannah Walker Mystery · Book {b["series_no"]}')}
-    <h2 class="display h2">{esc(b['title'])}{f'<span class="subtitle">{esc(b["subtitle"])}</span>' if b['subtitle'] else ''}</h2>
-    <p class="tagline">{b['tagline']}</p>
+    {eyebrow(series_kicker(b))}
+    <h3 class="display h2">{esc(b['title'])}{f'<span class="subtitle">{esc(b["subtitle"])}</span>' if b['subtitle'] else ''}</h3>
+    <p class="tagline">{esc(b['tagline'])}</p>
     <p>{b['blurb'][0]}</p>
-    <p class="award-line">{ICONS['star']} {esc(b['award'])}</p>
+    {award_html(b)}
     <div class="actions">{actions}</div>
   </div>
 </article>''')
-    body = f'''{page_hero('The Books', 'Riveting Mysteries', 'bg-tabletop', 'The Hannah Walker Mystery Series—suspenseful, emotionally layered journeys into love, secrets, and resilience.')}
-<section class="section books-list"><div class="container">{''.join(rows)}</div></section>
+        note = '<p class="series-banner__note">Prospective titles. These books are still in development, and further titles will follow.</p>' if series == 'astrid-fitzgerald' else ''
+        sections.append(f'''<header class="series-banner reveal" id="{series}">
+  {eyebrow('In Development' if series == 'astrid-fitzgerald' else 'Series')}
+  <h2 class="display h2">{esc(books_in(series)[0]['series_name'])}</h2>
+  {note}
+</header>
+{''.join(rows)}''')
+    body = f'''{page_hero('The Books', 'Riveting Mysteries', 'bg-tabletop', 'The Hannah Walker Mystery Series, and the Astrid Fitzgerald Mystery Series now in development.')}
+<section class="section books-list"><div class="container">{''.join(sections)}</div></section>
 {newsletter_strip()}'''
-    return layout('/books/', 'Books: The Hannah Walker Mystery Series', 'All four Hannah Walker mysteries by Bree T. Wilson: Deadly College Murders, Deadly Vows, Paris Noir: Deadly Obsession and The Thirteenth Riddle: A Poisoned Silence.', body, '/books/',
-                  schema=[series_schema()], crumbs=[('Books', '/books/')], preload=['bg-tabletop'])
+    return layout('/books/', 'Books: Hannah Walker and Astrid Fitzgerald', 'The Hannah Walker mysteries, plus the Astrid Fitzgerald series in development: Who Murdered Erica Ivy, The Woman in the Evidence and Someone Lied at Midnight.', body, '/books/',
+                  schema=series_schemas(), crumbs=[('Books', '/books/')], preload=['bg-tabletop'])
 
 
 def book_page(b):
-    idx = BOOKS.index(b)
+    sibs = books_in(b['series'])
+    idx = sibs.index(b)
     soon = b['status'] == 'coming-soon'
     shop = ''.join(f'<a class="shop-btn" href="{esc(u)}" target="_blank" rel="noopener">{ICONS["book"]}<span>{esc(n)}</span></a>' for n, u in b['shop'])
     shop_block = (f'<div class="shop"><h2 class="mini-h">Shop Now</h2><div class="shop__grid">{shop}</div></div>' if shop
-                  else '<div class="shop"><h2 class="mini-h">Coming Soon</h2><p class="muted">Join the newsletter to hear the moment it’s released.</p>' + btn('Join the Newsletter', '/newsletter/') + '</div>')
+                  else f'<div class="shop"><h2 class="mini-h">{esc(status_label(b))}</h2><p class="muted">Join the newsletter to hear the moment it’s released.</p>' + btn('Join the Newsletter', '/newsletter/') + '</div>')
     blurb = ''.join(f'<p>{p}</p>' for p in b['blurb'])
     sections = []
     if b['teaser']:
@@ -556,7 +637,7 @@ def book_page(b):
         sections.append(f'''<section class="section characters"><div class="container">
   <div class="section-head section-head--center reveal">{eyebrow('The Cast')}<h2 class="display h2">Meet the Characters</h2></div>
   <div class="char-grid">{chars}</div></div></section>''')
-    prev_b, next_b = BOOKS[idx - 1] if idx else None, BOOKS[idx + 1] if idx + 1 < len(BOOKS) else None
+    prev_b, next_b = sibs[idx - 1] if idx else None, sibs[idx + 1] if idx + 1 < len(sibs) else None
     pager = '<nav class="book-pager container" aria-label="More books">'
     pager += f'<a class="prev" href="{book_url(prev_b)}"><small>Previous Book</small>{esc(full_title(prev_b))}</a>' if prev_b else '<span></span>'
     pager += f'<a class="next" href="{book_url(next_b)}"><small>Next Book</small>{esc(full_title(next_b))}</a>' if next_b else '<span></span>'
@@ -564,12 +645,12 @@ def book_page(b):
     body = f'''<section class="book-hero">
   <div class="book-hero__bg" style="background-image:url('/assets/img/{b['bg']}.webp')" aria-hidden="true"></div>
   <div class="container book-hero__grid">
-    <div class="book-hero__cover reveal{' is-flat' if soon else ''}">{'<span class="book-card__flag">Coming Soon</span>' if soon else ''}{img(b['cover'], full_title(b) + ' book cover', eager=True)}</div>
+    <div class="{cover_class(b, 'book-hero__cover')} reveal">{f'<span class="book-card__flag">{esc(status_label(b))}</span>' if soon else ''}{img(b['cover'], full_title(b) + ' book cover', eager=True)}</div>
     <div class="book-hero__copy reveal" style="--d:120ms">
-      {eyebrow(f'Hannah Walker Mystery · Book {b["series_no"]}')}
+      {eyebrow(series_kicker(b))}
       <h1 class="display">{esc(b['title'])}{f'<span class="subtitle">{esc(b["subtitle"])}</span>' if b['subtitle'] else ''}</h1>
-      <p class="tagline">{b['tagline']}</p>
-      <p class="award-line">{ICONS['star']} {esc(b['award'])}</p>
+      <p class="tagline">{esc(b['tagline'])}</p>
+      {award_html(b)}
       {shop_block}
     </div>
   </div>
@@ -578,7 +659,7 @@ def book_page(b):
 {''.join(sections)}
 {pager}
 {newsletter_strip()}'''
-    desc = f'{full_title(b)} (Hannah Walker Mystery, Book {b["series_no"]}) by Bree T. Wilson. ' + re.sub(r'<[^>]+>', '', b['blurb'][0])
+    desc = f'{full_title(b)} ({b["series_name"].removesuffix(" Series")}, Book {b["series_no"]}) by Bree T. Wilson. ' + re.sub(r'<[^>]+>', '', b['blurb'][0])
     extra = (f'<meta property="book:author" content="{SITE_URL}/about">\n'
              + (f'<meta property="book:isbn" content="{b["isbn"]}">\n' if b.get('isbn') else '')
              + (f'<meta property="book:release_date" content="{b["published"]}">\n' if b.get('published') else ''))
@@ -613,7 +694,11 @@ def awards():
                   crumbs=[('Awards', '/awards/')], preload=['bg-library'])
 
 
-BOOK_PATTERNS = [(b, re.compile(p)) for b, p in zip(BOOKS, [r'Deadly College Murders', r'Deadly Vows', r'Paris Noir', r'(?:The )?Thirteenth Riddle'])]
+TITLE_PATTERNS = {
+    'the-thirteenth-riddle-a-poisoned-silence': r'(?:The )?Thirteenth Riddle',
+    'who-murdered-erica-ivy': r'Who Murdered Erica I(?:vy)?',
+}
+BOOK_PATTERNS = [(b, re.compile(TITLE_PATTERNS.get(b['slug'], re.escape(b['title'])))) for b in BOOKS]
 
 
 def post_book(p):
@@ -681,7 +766,10 @@ def blog_pages():
         pager += '</nav>'
         related = [q for q in POSTS if q is not p and book and post_book(q) is book][:3] or [q for q in POSTS if q is not p][:3]
         rel = ''.join(f'<li><a href="/blog/{q["slug"]}/"><time datetime="{q["date"]}">{fmt_date(q["date"])}</time>{esc(q["title"])}</a></li>' for q in related)
-        side = ''.join(f'<li><a href="{book_url(b)}">{img(b["flat"], full_title(b) + " cover")}<span>{esc(full_title(b))}</span></a></li>' for b in BOOKS)
+        side = ''
+        for series in series_ids():
+            items = ''.join(f'<li><a href="{book_url(b)}">{img(b["flat"], full_title(b) + " cover")}<span>{esc(full_title(b))}</span></a></li>' for b in books_in(series))
+            side += f'<h2 class="mini-h">{esc(series_short(series))}</h2><ul class="mini-books">{items}</ul>'
         body = f'''<section class="post-hero">
   <div class="page-hero__bg" style="background-image:url('/assets/img/bg-desk.webp')" aria-hidden="true"></div>
   <div class="container post-hero__inner reveal">
@@ -695,7 +783,7 @@ def blog_pages():
   <article class="prose prose--post">{content}
     <div class="related"><h2 class="mini-h">{'More on ' + esc(book['short']) if book else 'More from the Blog'}</h2><ul>{rel}</ul></div>
     {pager}</article>
-  <aside class="post__side"><h2 class="mini-h">The Hannah Walker Mysteries</h2><ul class="mini-books">{side}</ul>
+  <aside class="post__side">{side}
     <div class="side-nl"><h2 class="mini-h">Newsletter</h2><p>Get new book announcements and the occasional update.</p>{btn('Sign Up', '/newsletter/')}</div></aside>
 </div></section>'''
         url = clean_url(f'/blog/{p["slug"]}/')
@@ -716,7 +804,7 @@ def newsletter():
     body = f'''{page_hero('Join My Mailing List', 'Newsletter', 'bg-library', '', small=True)}
 <section class="section nl-page">
   <div class="container nl-page__grid">
-    <div class="nl-page__covers reveal" aria-hidden="true">{''.join(img(b['cover'], '') for b in BOOKS[:3])}</div>
+    <div class="nl-page__covers reveal" aria-hidden="true">{''.join(img(b['cover'], '') for b in books_in('hannah-walker')[:3])}</div>
     <div class="nl-card reveal" style="--d:120ms">
       {eyebrow('Newsletter')}
       <h2 class="display h2">Be the First to Know</h2>

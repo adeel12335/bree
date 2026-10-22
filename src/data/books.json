@@ -5,6 +5,8 @@
   "subtitle": "",
   "short": "Deadly College Murders",
   "series_no": 1,
+  "series": "hannah-walker",
+  "series_name": "Hannah Walker Mystery Series",
   "cover": "cover-deadly-college-murders",
   "bg": "bg-campus",
   "tagline": "Trust no one. Decode everything. Run, if you still can.",
@@ -80,6 +82,8 @@
   "subtitle": "Echoes of College Crimes",
   "short": "Deadly Vows",
   "series_no": 2,
+  "series": "hannah-walker",
+  "series_name": "Hannah Walker Mystery Series",
   "cover": "cover-deadly-vows",
   "bg": "bg-chapel",
   "tagline": "“What begins with love... ends with silence.”",
@@ -150,6 +154,8 @@
   "subtitle": "Deadly Obsession",
   "short": "Paris Noir",
   "series_no": 3,
+  "series": "hannah-walker",
+  "series_name": "Hannah Walker Mystery Series",
   "cover": "cover-paris-noir",
   "bg": "bg-paris-night",
   "tagline": "Every Clue Leads to Paris. Everybody Is a Message. And He’s Always One Step Ahead.",
@@ -189,6 +195,8 @@
   "subtitle": "A Poisoned Silence",
   "short": "The Thirteenth Riddle",
   "series_no": 4,
+  "series": "hannah-walker",
+  "series_name": "Hannah Walker Mystery Series",
   "cover": "cover-thirteenth-riddle",
   "bg": "bg-train",
   "tagline": "A Hannah Walker Mystery",
@@ -218,5 +226,102 @@
   "characters": [],
   "flat": "cover-thirteenth-riddle",
   "og": "og-thirteenth-riddle.jpg"
+ },
+ {
+  "slug": "who-murdered-erica-ivy",
+  "title": "Who Murdered Erica Ivy",
+  "subtitle": "",
+  "short": "Who Murdered Erica Ivy",
+  "series_no": 1,
+  "series": "astrid-fitzgerald",
+  "series_name": "Astrid Fitzgerald Mystery Series",
+  "cover": "cover-who-murdered-erica-ivy",
+  "cover_fit": "contain",
+  "bg": "bg-erica-cliff",
+  "tagline": "Some secrets don’t stay buried. Some names should never be forgotten.",
+  "status": "coming-soon",
+  "status_label": "In Development",
+  "award": "",
+  "blurb": [
+   "Astrid Fitzgerald did not expect the past to walk back into her case files. A no-nonsense detective shaped by a tragic history, she is pulled off balance when Erica Ivy is murdered—the woman who ruined her life years earlier.",
+   "Erica was cold, manipulative, and willing to remove anyone in her way. She and Astrid share a dark, complicated history, and a break-in had already brought them face to face. Now the murder is Astrid’s to solve, and justice is tangled up with everything she has tried to bury.",
+   "The only man she trusts is Thomas, the former criminal justice professor who trained her to read people. He keeps her clear-headed as the suspects multiply and every clue points somewhere she would rather not look.",
+   "Some secrets don’t stay buried. Some names should never be forgotten.",
+   "<strong>Who Murdered Erica Ivy:</strong> Trust no one. Question everything."
+  ],
+  "shop": [],
+  "trailer": null,
+  "reviews": [],
+  "teaser": null,
+  "characters": [
+   [
+    "Astrid Fitzgerald",
+    "A no-nonsense detective with a steely demeanor, shaped by a painful past that left her guarded. Erica ruined her life years earlier. When Erica Ivy is murdered, Astrid cannot chase the case without confronting that history."
+   ],
+   [
+    "Thomas",
+    "Astrid’s former criminal justice professor, and the only man she trusts. He trained her to read people and keeps her clear-headed when the murder pulls her off balance. He worries for her safety, and he asks her not to let Erica’s death consume her."
+   ],
+   [
+    "Erica Ivy",
+    "Cold, manipulative, and willing to remove anyone who stands in her way. Her history with Astrid is the wound at the center of the first book, and her murder opens the Astrid Fitzgerald Mystery Series."
+   ]
+  ],
+  "flat": "cover-who-murdered-erica-ivy",
+  "og": "og-who-murdered-erica-ivy.jpg"
+ },
+ {
+  "slug": "the-woman-in-the-evidence",
+  "title": "The Woman in the Evidence",
+  "subtitle": "",
+  "short": "The Woman in the Evidence",
+  "series_no": 2,
+  "series": "astrid-fitzgerald",
+  "series_name": "Astrid Fitzgerald Mystery Series",
+  "cover": "cover-the-woman-in-the-evidence",
+  "cover_fit": "contain",
+  "bg": "bg-evidence",
+  "tagline": "A fractured mirror, a woman’s reflection, and evidence that someone is hiding the truth.",
+  "status": "coming-soon",
+  "status_label": "In Development",
+  "award": "",
+  "blurb": [
+   "The Woman in the Evidence is the second book in the Astrid Fitzgerald Mystery Series. A fractured mirror, a woman’s reflection, and evidence that suggests someone is hiding the truth.",
+   "What looks settled in the glass does not match the story around it. The proof starts to split, and Astrid has to decide which reflection is the one she can trust."
+  ],
+  "shop": [],
+  "trailer": null,
+  "reviews": [],
+  "teaser": null,
+  "characters": [],
+  "flat": "cover-the-woman-in-the-evidence",
+  "og": "og-the-woman-in-the-evidence.jpg"
+ },
+ {
+  "slug": "someone-lied-at-midnight",
+  "title": "Someone Lied at Midnight",
+  "subtitle": "",
+  "short": "Someone Lied at Midnight",
+  "series_no": 3,
+  "series": "astrid-fitzgerald",
+  "series_name": "Astrid Fitzgerald Mystery Series",
+  "cover": "cover-someone-lied-at-midnight",
+  "cover_fit": "contain",
+  "bg": "bg-midnight",
+  "tagline": "A shadow behind interrogation glass, a rain-soaked room, and a secret that refuses to stay buried.",
+  "status": "coming-soon",
+  "status_label": "In Development",
+  "award": "",
+  "blurb": [
+   "Someone Lied at Midnight is the third book in the Astrid Fitzgerald Mystery Series. A shadow waits behind interrogation glass, in a rain-soaked room, and a secret refuses to stay buried.",
+   "The figure on the other side of the glass has already told a story. Astrid has to find the lie that midnight was supposed to keep."
+  ],
+  "shop": [],
+  "trailer": null,
+  "reviews": [],
+  "teaser": null,
+  "characters": [],
+  "flat": "cover-someone-lied-at-midnight",
+  "og": "og-someone-lied-at-midnight.jpg"
  }
 ]
