@@ -154,16 +154,37 @@ def awards_card():
     return vignette(im)
 
 
+def place_row(plate, names, height, y, gap=40, margin=120):
+    covers = [load_cover(n, height) for n in names]
+    total = sum(c.width for c in covers) + gap * (len(covers) - 1)
+    limit = W - margin * 2
+    if total > limit:
+        scale = limit / total
+        covers = [c.resize((max(1, round(c.width * scale)), max(1, round(c.height * scale))), Image.Resampling.LANCZOS) for c in covers]
+        total = sum(c.width for c in covers) + gap * (len(covers) - 1)
+    x = (W - total) // 2
+    for cover in covers:
+        paste(plate, cover, (x, y))
+        x += cover.width + gap
+    return covers[0].height
+
+
 def astrid_card():
-    im = row_of([
+    plate = canvas()
+    d = ImageDraw.Draw(plate)
+    tracked(d, 'A NEW SERIES  ·  IN DEVELOPMENT', font(30), 48, GOLD, 8)
+    tracked(d, 'ASTRID FITZGERALD', font(48), 96, CREAM, 4)
+    top = place_row(plate, [
         'cover-who-murdered-erica-ivy',
         'cover-the-woman-in-the-evidence',
         'cover-someone-lied-at-midnight',
-    ], 860, 360)
-    d = ImageDraw.Draw(im)
-    tracked(d, 'A NEW SERIES  ·  IN DEVELOPMENT', font(32), 118, GOLD, 8)
-    tracked(d, 'ASTRID FITZGERALD', font(58), 175, CREAM, 5)
-    return vignette(im)
+    ], 500, 176)
+    place_row(plate, [
+        'cover-the-alibi-nobody-remembered',
+        'cover-the-hour-before-her-death',
+        'cover-what-astrid-never-buried',
+    ], 680, 176 + top + 24)
+    return vignette(plate)
 
 
 def close_card():

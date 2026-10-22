@@ -599,7 +599,7 @@ def books_index():
     body = f'''{page_hero('The Books', 'Riveting Mysteries', 'bg-tabletop', 'The Hannah Walker Mystery Series, and the Astrid Fitzgerald Mystery Series now in development.')}
 <section class="section books-list"><div class="container">{''.join(sections)}</div></section>
 {newsletter_strip()}'''
-    return layout('/books/', 'Books: Hannah Walker and Astrid Fitzgerald', 'The Hannah Walker mysteries, plus the Astrid Fitzgerald series in development: Who Murdered Erica Ivy, The Woman in the Evidence and Someone Lied at Midnight.', body, '/books/',
+    return layout('/books/', 'Books: Hannah Walker and Astrid Fitzgerald', 'The Hannah Walker mysteries, plus the Astrid Fitzgerald series: six books still in development.', body, '/books/',
                   schema=series_schemas(), crumbs=[('Books', '/books/')], preload=['bg-tabletop'])
 
 
