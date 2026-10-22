@@ -4,7 +4,7 @@ Content lives in src/data (books.json, posts.json, pages.json); page bodies are
 rendered here so every page shares one header, footer and design system.
 Run:  python tools/build.py
 """
-import json, html, math, os, re, shutil, sys
+import hashlib, json, html, math, os, re, shutil, sys
 from datetime import date
 from functools import lru_cache
 from pathlib import Path
@@ -71,6 +71,12 @@ def laurel_svg():
 def img_size(name):
     with Image.open(OUT / 'assets' / 'img' / f'{name}.webp') as im:
         return im.size
+
+
+@lru_cache(maxsize=None)
+def asset_url(path):
+    version = hashlib.sha256((OUT / path.lstrip('/')).read_bytes()).hexdigest()[:12]
+    return f'{path}?v={version}'
 
 
 def img(name, alt, cls='', w=None, h=None, eager=False):
@@ -376,7 +382,7 @@ def layout(path, title, desc, body, active=None, og_image='og.jpg', schema=None,
 {pre}<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Lato:wght@300;400;700&family=Pinyon+Script&display=swap">
-<link rel="stylesheet" href="/assets/css/style.css">
+<link rel="stylesheet" href="{asset_url('/assets/css/style.css')}">
 <script>document.documentElement.classList.add('js')</script>
 {ld}
 </head>
@@ -388,7 +394,7 @@ def layout(path, title, desc, body, active=None, og_image='og.jpg', schema=None,
 </main>
 {footer()}
 <div class="lightbox" data-lightbox hidden><button class="lightbox__close" aria-label="Close">×</button><button class="lightbox__nav lightbox__prev" aria-label="Previous">‹</button><figure><img alt=""><figcaption></figcaption></figure><button class="lightbox__nav lightbox__next" aria-label="Next">›</button></div>
-<script src="/assets/js/main.js" defer></script>
+<script src="{asset_url('/assets/js/main.js')}" defer></script>
 </body>
 </html>'''
 
