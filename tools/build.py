@@ -432,7 +432,7 @@ def home():
     latest = ''.join(post_card(p) for p in POSTS[:3])
     body = f'''
 <section class="hero">
-  <div class="hero__bg" aria-hidden="true"></div>
+  <div class="hero__bg">{img('bree-hero-library', 'Bree T. Wilson seated at her writing desk in a warmly lit library', 'hero__scene', eager=True)}</div>
   <div class="container hero__grid">
     <div class="hero__copy">
       {eyebrow('4-Time Award-Winning Author', 'reveal')}
@@ -440,10 +440,7 @@ def home():
       <p class="hero__lead reveal" style="--d:160ms">Bree’s storytelling blends the cerebral thrill of riddles with the raw humanity of resilience, memory, and emotional depth.</p>
       <div class="hero__actions reveal" style="--d:240ms">{btn('Explore the Books', '/books/')}{btn('Watch the Intro', '#intro', 'ghost', arrow=False)}</div>
     </div>
-    <div class="hero__portrait reveal" style="--d:200ms">
-      <div class="arch">{img('bree-iiba-deadly-vows-hero', 'Bree T. Wilson receiving her International Impact Book Award for Deadly Vows: Echoes of College Crimes', eager=True)}</div>
-      {img('distinguished-author-seal', 'International Impact Book Awards — Distinguished Author seal', 'hero__seal', w=600, h=600)}
-    </div>
+    {img('distinguished-author-seal', 'International Impact Book Awards — Distinguished Author seal', 'hero__seal', w=600, h=600)}
   </div>
   <a class="scroll-cue" href="#intro" aria-label="Scroll to the introduction"><span></span></a>
 </section>
@@ -528,7 +525,7 @@ def home():
                'description': 'Official website of murder mystery author Bree T. Wilson', 'publisher': {'@id': SITE_URL + '/#author'}},
               PERSON, *series_schemas()]
     return layout('/', SITE_NAME, 'Official site of Bree T. Wilson, four-time International Impact Book Awards winner and author of the Hannah Walker and Astrid Fitzgerald mystery series.', body, '/', schema=schema, body_cls='is-home',
-                  preload=['bree-iiba-deadly-vows-hero', 'bg-library'])
+                  preload=['bree-hero-library'])
 
 
 def about():
